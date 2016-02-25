@@ -1,0 +1,4 @@
+/configs/*.json
+/configs/*.pem
+*.pyc
+/venv

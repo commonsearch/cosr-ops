@@ -1,0 +1,43 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-east-1",
+    "source_ami": "ami-35b1885c",
+    "subnet_id":"subnet-TODO_READ_FROM_CONFIG",
+    "vpc_id":"vpc-TODO_READ_FROM_CONFIG",
+    "instance_type": "c4.large",
+    "ssh_username": "root",
+    "ssh_timeout": "1200s",
+    "ami_name": "CommonSearch Spark AMI {{timestamp}}",
+    "ami_regions": ["us-east-1"],
+    "launch_block_device_mappings": [{
+        "device_name": "/dev/sda1",
+        "volume_size": 40,
+        "volume_type": "standard",
+        "delete_on_termination": true,
+        "encrypted": false
+    }],
+    "ami_block_device_mappings": [{
+        "device_name": "/dev/sda1",
+        "volume_size": 40,
+        "volume_type": "standard",
+        "delete_on_termination": true,
+        "encrypted": false
+    }]
+  }],
+  "provisioners": [
+      {
+        "type": "shell",
+        "scripts": [
+          "aws/spark/ec2-ami-setup.sh"
+        ]
+      }
+  ]
+
+}

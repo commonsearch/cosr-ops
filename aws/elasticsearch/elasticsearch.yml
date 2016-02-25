@@ -1,0 +1,83 @@
+cluster:
+  name: |||{"Ref":"ElasticsearchClusterName"}|||
+  routing:
+    allocation:
+      awareness:
+        attributes: "rack_id"
+
+plugin:
+  mandatory: "cloud-aws"
+
+discovery:
+  type: "ec2"
+  ec2:
+    host_type: "private_ip"
+    ping_timeout: "3s"
+    groups: |||{"Ref":"ElasticsearchSecurityGroup"}|||
+    tag:
+      service_name: "elasticsearch"
+  zen:
+    ping:
+      multicast:
+        enabled: false
+
+network:
+  publish_host: "_ec2:privateIpv4_"
+  host: "0.0.0.0"
+
+cloud:
+  node:
+    auto_attributes: true
+  aws:
+    region: |||{"Ref": "AWS::Region"}|||
+    access_key: |||{"Ref": "InternalUserKeys"}|||
+    secret_key: |||{"Fn::GetAtt": ["InternalUserKeys", "SecretAccessKey"]}|||
+
+bootstrap:
+  mlockall: true
+
+# TODO fine-tune this!
+# indices.fielddata.cache.size: "30%"
+# indices.cache.filter.size: "30%"
+
+http:
+  enabled: true
+
+index.store.throttle.type: none
+
+{% if service_fullname == "ElasticsearchData" %}
+
+# TODO https://www.elastic.co/guide/en/elasticsearch/guide/current/indexing-performance.html
+# index.merge.scheduler.max_thread_count: 1
+# indices.store.throttle.type: "none"
+# index.number_of_replicas: 0
+# index.refresh_interval: -1
+# "indices.memory.index.buffer_size" : "1gb"
+# "index.translog.flush_translog_period" : "1gb"
+# "index.translog.flush_thresold_period":"15m"
+
+path:
+  data: "|||{"Fn::FindInMap":["InstanceTypes", { "Ref" : "ElasticsearchDataInstanceType" }, "EsPathData"]}|||"
+
+node:
+  master: false
+  data: true
+  # TODO use AZ instead?
+  rack_id: |||{"Ref": "AWS::Region"}|||
+  name: data.|||{"Ref": "AWS::Region"}|||.${HOSTNAME}
+
+{% elif service_fullname == "ElasticsearchMaster" %}
+
+node:
+  master: true
+  data: false
+  name: master.|||{"Ref": "AWS::Region"}|||.${HOSTNAME}
+
+{% elif service_fullname == "ElasticsearchLb" %}
+
+node:
+  master: false
+  data: false
+  name: lb.|||{"Ref": "AWS::Region"}|||.${HOSTNAME}
+
+{% endif %}

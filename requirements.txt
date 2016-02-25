@@ -1,0 +1,5 @@
+jinja2==2.8
+boto==2.39.0
+requests==2.9.1
+gevent==1.1rc4
+awscli==1.10.7
