@@ -1,5 +1,7 @@
 import re
 import os
+import subprocess
+import time
 from jinja2 import Template
 from boto import ec2
 
@@ -17,7 +19,7 @@ def get_command_from_template(command_template):
 
 def ssh(instance, command):
     """ Executes a SSH command on a remote instance """
-    os.system("ssh %s %s@%s '%s'" % (
+    os.system("ssh -t %s %s@%s '%s'" % (
         SSH_ARGS, AWS_USER, instance.public_dns_name, command
     ))
 
@@ -49,6 +51,47 @@ def import_cosrback_local_data(instance):
     ssh(instance,
         'cd /cosr/back/ && source venv/bin/activate && make import_local_data'
         )
+
+def is_ssh_available(host, user=AWS_USER):
+    """ Checks if SSH is available on a host. """
+
+    s = subprocess.Popen(
+        ['ssh'] + SSH_ARGS.split(" ") + ['-t', '-t', '-o', 'ConnectTimeout=3', '%s@%s' % (user, host), "true"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    cmd_output = s.communicate()[0]  # [1] is stderr
+
+    return s.returncode == 0
+
+def create_ec2_instance(name, instance_type="t2.micro", ami=CONFIG["AWS_SPARK_AMI"]):
+    """ Creates an instance on EC2 with our default configuration """
+
+    conn = ec2.connect_to_region(CONFIG["AWS_REGION"])
+    reservation = conn.run_instances(
+        ami,
+        key_name=CONFIG["AWS_KEYNAME"],
+        instance_type=instance_type,
+        security_group_ids=[CONFIG["AWS_SECURITYGROUP"]],
+        subnet_id=CONFIG["AWS_SUBNET"]
+    )
+    time.sleep(15)
+    instance = reservation.instances[0]
+    status = instance.update()
+
+    while status == 'pending':
+        time.sleep(10)
+        status = instance.update()
+
+    if status == 'running':
+        instance.add_tag("Name", name)
+    else:
+        raise "Unknown instance status:", status
+
+    while not is_ssh_available(instance.public_dns_name):
+        time.sleep(5)
+
+    return instance
 
 
 def lookup_ec2_instances(name_prefix=""):
