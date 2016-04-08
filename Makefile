@@ -3,9 +3,9 @@
 # Available configuration variables and their defaults
 #
 
-# TODO: how to read those variables from configs/cosr-ops.prod.json ?
-COSR_AWS_STACKNAME	?= mystackname
-COSR_AWS_REGION		?= us-east-1
+COSR_AWS_STACKNAME      := $(shell python aws/config.py AWS_STACKNAME)
+COSR_AWS_REGION         := $(shell python aws/config.py AWS_REGION)
+
 
 # Path to your local install of Spark
 SPARK_DIR			?= ../spark-1.6.0
