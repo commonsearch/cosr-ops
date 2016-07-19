@@ -17,7 +17,7 @@ You should make sure your Docker daemon is started. Check the [Docker documentat
 
 
 
-## 2. Download the code & the Docker images
+## 2. Download the code & the Docker image
 
 To clone this repository from GitHub, go to your local workspace directory and run:
 
@@ -38,3 +38,11 @@ Alternatively, you can do `make docker_build` to build the image again locally.
 ## 3. You're done!
 
 Congratulations! You should now be able to start diving further in the code of `cosr-ops`.
+
+To open a shell inside the Docker image with all the tools installed, just type:
+
+```
+make docker_shell
+```
+
+Happy hacking!
