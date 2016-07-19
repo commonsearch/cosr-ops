@@ -16,15 +16,26 @@ SPARK_DIR			?= ../spark-1.6.0
 # General commands
 #
 
-# Creates a local Python virtualenv with all required modules installed
-virtualenv:
-	rm -rf venv
-	virtualenv venv --distribute
-	venv/bin/pip install -r requirements.txt
-
 # Runs all available tests on this repository
 test:
 	make aws_elasticsearch_validate
+
+
+#
+# Commands for the local Docker image
+#
+
+# Build the image locally
+docker_build:
+	docker build -t commonsearch/local-ops .
+
+# Login into the container
+docker_shell:
+	docker run -v "$(PWD):/cosr/ops:rw" -w /cosr/ops -i -t commonsearch/local-ops bash
+
+# Pulls the image from Docker hub
+docker_pull:
+	docker pull commonsearch/local-ops
 
 
 #

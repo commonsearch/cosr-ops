@@ -20,14 +20,9 @@ Here is how they fit in our [current infrastructure](https://about.commonsearch.
 
 ## Local install
 
-Running `cosr-ops` on your local machine is very simple. You only need to have Python installed.
+A complete guide available in [INSTALL.md](INSTALL.md).
 
-To enter a virtualenv with all the dependencies available, just use:
 
-```
-make virtualenv
-source venv/bin/activate
-```
 ## Creating a configuration file
 
 You will need to create a `configs/cosr-ops.prod.json` with the following template:

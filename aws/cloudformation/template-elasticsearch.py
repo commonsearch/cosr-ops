@@ -183,7 +183,7 @@ LAUNCHCONFIGURATION = {
     #   "command": "yum update -y"
     # },
     "10_install_elasticsearch": {
-      "command": "rpm -ivh https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.2.0/elasticsearch-2.2.0.rpm"
+      "command": "rpm -ivh https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.3.4/elasticsearch-2.3.4.rpm"
     },
     "11_elasticsearch_plugins": {
       "command": (
