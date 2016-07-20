@@ -112,4 +112,4 @@ aws_spark_delete:
 
 # Build a new Spark Amazon Machine Image
 aws_spark_build_ami:
-	packer build aws/spark/packer-ami-template.json
+	packer build aws/spark/ami/packer-ami-template.json

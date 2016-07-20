@@ -15,8 +15,9 @@ MAPPINGS = {
 
   # TODO: we should build our own AMIs in all cases
   # amzn-ami-minimal-hvm-2015.03.rc-1.x86_64-s3
+  # https://aws.amazon.com/amazon-linux-ami/
   "MinimalAmazonLinuxAMI": {
-    "us-east-1": {"instance": "ami-c74dfcac", "ebs": "ami-314cfd5a"}
+    "us-east-1": {"instance": "ami-dc6aa9b1", "ebs": "ami-6869aa05"}
   }
 }
 

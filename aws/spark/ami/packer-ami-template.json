@@ -1,0 +1,27 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-east-1",
+    "source_ami": "ami-6869aa05",
+    "instance_type": "c4.large",
+    "ssh_username": "ec2-user",
+    "ssh_timeout": "1200s",
+    "ami_name": "CommonSearch Spark AMI {{timestamp}}",
+    "ami_regions": ["us-east-1"]
+  }],
+  "provisioners": [
+      {
+        "type": "shell",
+        "scripts": [
+          "aws/spark/ami/ec2-ami-setup.sh"
+        ]
+      }
+  ]
+
+}
