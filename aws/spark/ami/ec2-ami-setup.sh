@@ -12,8 +12,11 @@
 
 set -e
 
+echo "LANG=en_US.utf-8" >> /etc/environment
+echo "LC_ALL=en_US.utf-8" >> /etc/environment
+
 sudo yum update -y
-sudo yum install git gcc gcc-c++ zlib-devel bzip2-devel snappy-devel libffi-devel autoconf libtool automake openssl-devel strace -y
+sudo yum install git gcc gcc-c++ zlib-devel bzip2-devel snappy-devel libffi-devel autoconf libtool automake openssl-devel strace dstat -y
 sudo yum update binutils -y
 
 # Install latest Python
@@ -67,8 +70,11 @@ rm -rf requirements.txt
 
 sudo ldconfig /usr/local/lib
 
-
-
+# Create some directories that will be used by our code
 sudo mkdir -p /cosr/back
+sudo chown -R ec2-user /cosr
+
+sudo mkdir -p /usr/spark/packages/jars
+sudo chown -R ec2-user /usr/spark/packages
 
 sudo sh -c 'echo "syntax on" > /root/.vimrc'

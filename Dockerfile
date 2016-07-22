@@ -6,6 +6,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     wget \
     git \
     gcc \
+    ssh \
     build-essential \
     make \
     python \

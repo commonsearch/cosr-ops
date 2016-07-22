@@ -13,7 +13,8 @@
     "ssh_username": "ec2-user",
     "ssh_timeout": "1200s",
     "ami_name": "CommonSearch Spark AMI {{timestamp}}",
-    "ami_regions": ["us-east-1"]
+    "ami_regions": ["us-east-1"],
+    "ami_groups": ["all"]
   }],
   "provisioners": [
       {

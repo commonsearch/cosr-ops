@@ -9,7 +9,8 @@ COSR_AWS_REGION         := $(shell python aws/config.py AWS_REGION)
 
 # Path to your local install of Spark
 SPARK_DIR			?= ../spark-1.6.0
-
+SPARK_CLUSTER_NAME	?= test-flintrock2
+SPARK_COSR_BACK_TAG  ?= ""
 
 
 #
@@ -32,6 +33,10 @@ docker_build:
 # Login into the container
 docker_shell:
 	docker run -v "$(PWD):/cosr/ops:rw" -w /cosr/ops -i -t commonsearch/local-ops bash
+
+# Logins into the same container again
+docker_reshell:
+	sh -c 'docker exec -t -i `docker ps | grep commonsearch/local-ops | cut -f 1 -d " "` bash'
 
 # Pulls the image from Docker hub
 docker_pull:
@@ -113,3 +118,16 @@ aws_spark_delete:
 # Build a new Spark Amazon Machine Image
 aws_spark_build_ami:
 	packer build aws/spark/ami/packer-ami-template.json
+
+# New flintrock commands
+aws_spark_flintrock_create:
+	flintrock --config aws/spark/flintrock/config.yaml launch $(SPARK_CLUSTER_NAME)
+	flintrock --config aws/spark/flintrock/config.yaml describe $(SPARK_CLUSTER_NAME)
+	flintrock --config aws/spark/flintrock/config.yaml run-command $(SPARK_CLUSTER_NAME) 'sudo chown -R ec2-user /cosr'
+	make aws_spark_flintrock_update
+
+aws_spark_flintrock_update:
+	flintrock --config aws/spark/flintrock/config.yaml copy-file $(SPARK_CLUSTER_NAME) aws/spark/setup-node.sh /cosr/
+	flintrock --config aws/spark/flintrock/config.yaml run-command $(SPARK_CLUSTER_NAME) 'COSR_BACK_TAG=$(SPARK_COSR_BACK_TAG) bash /cosr/setup-node.sh'
+	flintrock --config aws/spark/flintrock/config.yaml copy-file $(SPARK_CLUSTER_NAME) configs/cosr-back-esless.prod.json /cosr/back/cosr-config.json
+	flintrock --config aws/spark/flintrock/config.yaml login $(SPARK_CLUSTER_NAME)
