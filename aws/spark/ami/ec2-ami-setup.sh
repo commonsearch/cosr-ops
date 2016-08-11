@@ -12,12 +12,13 @@
 
 set -e
 
-echo "LANG=en_US.utf-8" >> /etc/environment
-echo "LC_ALL=en_US.utf-8" >> /etc/environment
+sudo sh -c 'echo "LANG=en_US.utf-8" >> /etc/environment'
+sudo sh -c 'echo "LC_ALL=en_US.utf-8" >> /etc/environment'
 
 sudo yum update -y
-sudo yum install git gcc gcc-c++ zlib-devel bzip2-devel snappy-devel libffi-devel autoconf libtool automake openssl-devel strace dstat -y
+sudo yum install git gcc gcc-c++ zlib-devel bzip2-devel snappy-devel libffi-devel autoconf libtool automake openssl-devel strace dstat cmake java-1.8.0-openjdk-devel -y
 sudo yum update binutils -y
+sudo yum remove java-1.7.0-openjdk -y
 
 # Install latest Python
 PYTHON_VERSION=2.7.12
@@ -70,11 +71,28 @@ rm -rf requirements.txt
 
 sudo ldconfig /usr/local/lib
 
+# FAUP install
+cd /tmp && \
+    git clone https://github.com/stricaud/faup.git && \
+    cd faup && \
+    git checkout 07f9550fb288a94efccdaeeae66c34aafa91aded && \
+    cd build && \
+    cmake .. && make && \
+    sudo make install && \
+    sudo mv /usr/local/lib64/libfaupl* /usr/lib64/ && \
+    cd ../src/lib/bindings/python && \
+    sudo python setup.py install && \
+    cd / && sudo rm -rf /tmp/faup
+
+
 # Create some directories that will be used by our code
 sudo mkdir -p /cosr/back
 sudo chown -R ec2-user /cosr
 
 sudo mkdir -p /usr/spark/packages/jars
 sudo chown -R ec2-user /usr/spark/packages
+
+sudo sh -c 'echo "* soft nofile 1000000" >> /etc/security/limits.conf'
+sudo sh -c 'echo "* hard nofile 1000000" >> /etc/security/limits.conf'
 
 sudo sh -c 'echo "syntax on" > /root/.vimrc'

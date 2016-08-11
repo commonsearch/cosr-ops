@@ -1,4 +1,6 @@
 /configs/*.json
-/configs/*.pem
+/configs/*.yaml
+*.pem
 *.pyc
 /venv
+/local_*.py

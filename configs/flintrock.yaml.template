@@ -1,0 +1,63 @@
+#
+# This file is used by Flintrock to provision a Spark cluster
+# https://github.com/nchammas/flintrock
+#
+# Note: You have to rename flintrock.yaml.template to flintrock.yaml
+#
+
+provider: ec2
+
+services:
+  spark:
+    version: 2.0.1
+  hdfs:
+    version: 2.7.2
+
+launch:
+  install-hdfs: False
+  install-spark: True
+
+  #
+  # Change this to increase the number of machines in your cluster.
+  #
+  num-slaves: 2
+
+
+providers:
+  ec2:
+
+    #
+    # The AMI that will serve as base for the Spark master & slaves.
+    #
+    # This AMI ID was build from this repository (see cosr-ops/aws/spark/ami/) and contains all
+    # the dependencies for cosr-back. You can also use your own.
+    #
+    ami: ami-383baf2f
+
+    #
+    # Instance type, region and bid price
+    #
+    instance-type: c4.8xlarge
+    region: "us-east-1"
+    availability-zone: "us-east-1a"
+    spot-price: 0.6
+
+    #
+    # Provisioning options, specific to your AWS account
+    # Note: if you specify a subnet ID you don't need to specify the availability-zone above.
+    #
+    vpc-id: "vpc-CHANGEME"
+    subnet-id: "subnet-CHANGEME"
+    placement-group: "CHANGEME"
+    security-groups:
+       - "CHANGEME"
+    key-name: "CHANGEME"
+    identity-file: "/cosr/ops/configs/CHANGEME.pem"
+
+    #
+    # Standard options
+    #
+    instance-initiated-shutdown-behavior: terminate
+    tenancy: default
+    ebs-optimized: yes
+    user: ec2-user

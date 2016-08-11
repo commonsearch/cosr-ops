@@ -12,7 +12,7 @@ We have an [early documentation](https://about.commonsearch.org/developer/operat
 In a nutshell, 2 components are managed from this repository:
 
 - Our Elasticsearch cluster, using [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
-- Our [Backend](/developer/backend), using the [Spark EC2 scripts](http://spark.apache.org/docs/latest/ec2-scripts.html).
+- The Spark cluster for our [Backend](/developer/backend), using [Flintrock](https://github.com/nchammas/flintrock).
 
 Here is how they fit in our [current infrastructure](https://about.commonsearch.org/developer/architecture):
 
@@ -21,6 +21,31 @@ Here is how they fit in our [current infrastructure](https://about.commonsearch.
 ## Local install
 
 A complete guide available in [INSTALL.md](INSTALL.md).
+
+
+## Documentation
+
+We have a first tutorial online:
+
+ - [Analyzing the web with Spark on EC2](https://about.commonsearch.org/developer/tutorials/analyzing-the-web-with-spark-on-ec2)
+
+
+## Provisioning info
+
+### Common Crawl indexing
+
+- On the Spark workers, bottleneck is the CPU so all cores should be at 100% all the time.
+- The average CPU time on an EC2 c4 core is 17 minutes per ~1G Common Crawl file.
+- The June 2016 crawl has ~20.000 of them, so you need ~5.500 core hours.
+- Spot prices can reach as low as $0.01/h per core, so the whole job can be done for less than $60.
+
+### WebGraph generation
+
+- In progress.
+
+### PageRank
+
+- In progress.
 
 
 ## Creating a configuration file

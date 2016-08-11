@@ -1,3 +1,4 @@
+PWD := $(shell pwd)
 
 #
 # Available configuration variables and their defaults
@@ -8,8 +9,7 @@ COSR_AWS_REGION         := $(shell python aws/config.py AWS_REGION)
 
 
 # Path to your local install of Spark
-SPARK_DIR			?= ../spark-1.6.0
-SPARK_CLUSTER_NAME	?= test-flintrock2
+SPARK_CLUSTER_NAME	?= cosr
 SPARK_COSR_BACK_TAG  ?= ""
 
 
@@ -32,7 +32,7 @@ docker_build:
 
 # Login into the container
 docker_shell:
-	docker run -v "$(PWD):/cosr/ops:rw" -w /cosr/ops -i -t commonsearch/local-ops bash
+	docker run -v "$(PWD):/cosr/ops:rw" -v "$(PWD)/../cosr-back/:/cosr/back:rw" -w /cosr/ops -i -t commonsearch/local-ops bash
 
 # Logins into the same container again
 docker_reshell:
@@ -99,35 +99,25 @@ aws_elasticsearch_watch:
 # AWS Spark commands
 #
 
-# Create the Spark cluster
-aws_spark_create:
-	python aws/spark/manage-cluster.py create
-
-# Log in to the Spark master
-aws_spark_ssh:
-	python aws/spark/manage-cluster.py ssh
-
-# Deploy the cosr-back code on the Spark cluster
-aws_spark_deploy_cosrback:
-	python aws/spark/deploy-cosr-back.py
-
-# Destroy the Spark cluster
-aws_spark_delete:
-	python aws/spark/manage-cluster.py delete
-
 # Build a new Spark Amazon Machine Image
 aws_spark_build_ami:
 	packer build aws/spark/ami/packer-ami-template.json
 
-# New flintrock commands
+# Create a Spark cluster using Flintrock
 aws_spark_flintrock_create:
-	flintrock --config aws/spark/flintrock/config.yaml launch $(SPARK_CLUSTER_NAME)
-	flintrock --config aws/spark/flintrock/config.yaml describe $(SPARK_CLUSTER_NAME)
-	flintrock --config aws/spark/flintrock/config.yaml run-command $(SPARK_CLUSTER_NAME) 'sudo chown -R ec2-user /cosr'
-	make aws_spark_flintrock_update
+	flintrock launch $(SPARK_CLUSTER_NAME) --spark-download-source https://s3.amazonaws.com/packages.commonsearch.org/spark/spark-2.0.1-SNAPSHOT-bin-hadoop2.7.tgz
+	make aws_spark_flintrock_setup
+	flintrock login $(SPARK_CLUSTER_NAME)
 
-aws_spark_flintrock_update:
-	flintrock --config aws/spark/flintrock/config.yaml copy-file $(SPARK_CLUSTER_NAME) aws/spark/setup-node.sh /cosr/
-	flintrock --config aws/spark/flintrock/config.yaml run-command $(SPARK_CLUSTER_NAME) 'COSR_BACK_TAG=$(SPARK_COSR_BACK_TAG) bash /cosr/setup-node.sh'
-	flintrock --config aws/spark/flintrock/config.yaml copy-file $(SPARK_CLUSTER_NAME) configs/cosr-back-esless.prod.json /cosr/back/cosr-config.json
-	flintrock --config aws/spark/flintrock/config.yaml login $(SPARK_CLUSTER_NAME)
+# Update the Spark cluster with the config
+aws_spark_flintrock_setup:
+	flintrock copy-file $(SPARK_CLUSTER_NAME) aws/spark/setup-node.sh /cosr/
+	flintrock run-command $(SPARK_CLUSTER_NAME) 'COSR_BACK_TAG=$(SPARK_COSR_BACK_TAG) bash /cosr/setup-node.sh'
+	flintrock copy-file $(SPARK_CLUSTER_NAME) configs/cosr-back.prod.json /cosr/back/cosr-config.json
+	flintrock describe $(SPARK_CLUSTER_NAME)
+
+# Restart the Spark cluster and empty its caches
+aws_spark_flintrock_restart:
+	flintrock run-command $(SPARK_CLUSTER_NAME) --master-only "/home/ec2-user/spark/sbin/stop-slaves.sh && /home/ec2-user/spark/sbin/stop-master.sh"
+	flintrock run-command $(SPARK_CLUSTER_NAME) "rm -rf /media/root/spark && rm -rf /home/ec2-user/spark/work"
+	flintrock run-command $(SPARK_CLUSTER_NAME) --master-only "/home/ec2-user/spark/sbin/start-master.sh && /home/ec2-user/spark/sbin/start-slaves.sh"

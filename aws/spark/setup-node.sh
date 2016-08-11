@@ -16,6 +16,9 @@ fi
 
 #
 # Setup dependencies
+# They are already installed in the AMI but some versions might have been bumped on GitHub since then.
 #
 
 cd /cosr/back && sudo /usr/local/bin/pip install -r requirements.txt --upgrade
+
+sudo mkdir -p /usr/spark/packages/jars && sudo chown -R ec2-user /usr/spark/packages
