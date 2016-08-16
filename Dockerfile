@@ -71,3 +71,6 @@ RUN ln -s /cosr/ops/configs/flintrock.yaml /root/.config/flintrock/config.yaml
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
+
+# Save the hash at the time the image was built
+ADD .dockerhash /cosr/.ops-dockerhash

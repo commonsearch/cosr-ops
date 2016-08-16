@@ -1,5 +1,10 @@
 import json
 import sys
+import os
+
+
+if not os.path.isfile("configs/cosr-ops.prod.json"):
+    sys.exit(0)
 
 
 with open("configs/cosr-ops.prod.json") as f:
@@ -8,7 +13,7 @@ with open("configs/cosr-ops.prod.json") as f:
 
 if __name__ == '__main__':
     try:
-        ret_val = CONFIG.get(sys.argv[1])
+        ret_val = CONFIG.get(sys.argv[1]) or ''
     except (KeyboardInterrupt, SystemExit):
         raise
     except:

@@ -28,10 +28,11 @@ test:
 
 # Build the image locally
 docker_build:
+	make docker_hash > .dockerhash
 	docker build -t commonsearch/local-ops .
 
 # Login into the container
-docker_shell:
+docker_shell: docker_check
 	docker run -v "$(PWD):/cosr/ops:rw" -v "$(PWD)/../cosr-back/:/cosr/back:rw" -w /cosr/ops -i -t commonsearch/local-ops bash
 
 # Logins into the same container again
@@ -41,6 +42,14 @@ docker_reshell:
 # Pulls the image from Docker hub
 docker_pull:
 	docker pull commonsearch/local-ops
+
+# Checks if the container is out of date
+docker_check:
+	@bash -c 'docker run -v "$(PWD):/cosr/ops:ro" -t commonsearch/local-ops sh -c "if diff -q /cosr/.ops-dockerhash /cosr/ops/.dockerhash > /dev/null; then echo \"Docker image is up to date\"; else echo \"\nWARNING: Your Docker image seems to be out of date! Please exit and do \\\"make docker_build\\\" again to avoid any issues.\n\"; fi"'
+
+# Build a unique hash to indicate that a docker_build may be necessary again
+docker_hash:
+	@sh -c 'cat requirements.txt Dockerfile requirements3.txt | grep -vE "^\s*\#" | grep -vE "^\s*$$" | openssl md5'
 
 
 #
