@@ -116,13 +116,25 @@ aws_spark_build_ami:
 aws_spark_flintrock_create:
 	flintrock launch $(SPARK_CLUSTER_NAME) --spark-download-source https://s3.amazonaws.com/packages.commonsearch.org/spark/spark-2.0.1-SNAPSHOT-bin-hadoop2.7.tgz
 	make aws_spark_flintrock_setup
+	make aws_spark_flintrock_shell
+
+# Log into the master
+aws_spark_flintrock_shell:
 	flintrock login $(SPARK_CLUSTER_NAME)
+
+# Destroy the cluster
+aws_spark_flintrock_destroy:
+	flintrock destroy $(SPARK_CLUSTER_NAME)
 
 # Update the Spark cluster with the config
 aws_spark_flintrock_setup:
 	flintrock copy-file $(SPARK_CLUSTER_NAME) aws/spark/setup-node.sh /cosr/
 	flintrock run-command $(SPARK_CLUSTER_NAME) 'COSR_BACK_TAG=$(SPARK_COSR_BACK_TAG) bash /cosr/setup-node.sh'
-	flintrock copy-file $(SPARK_CLUSTER_NAME) configs/cosr-back.prod.json /cosr/back/cosr-config.json
+	flintrock copy-file $(SPARK_CLUSTER_NAME) configs/cosr-back.json /cosr/back/cosr-config.json
+	flintrock run-command $(SPARK_CLUSTER_NAME) sudo "sh -c 'echo \"* soft nofile 1000000\" >> /etc/security/limits.conf'"
+	flintrock run-command $(SPARK_CLUSTER_NAME) sudo "sh -c 'echo \"* hard nofile 1000000\" >> /etc/security/limits.conf'"
+	flintrock run-command $(SPARK_CLUSTER_NAME) sudo "sh -c 'echo \"ulimit -n 1000000\" >> /home/ec2-user/spark/conf/spark-env.sh'"
+	make aws_spark_flintrock_restart
 	flintrock describe $(SPARK_CLUSTER_NAME)
 
 # Restart the Spark cluster and empty its caches

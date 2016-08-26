@@ -1,0 +1,6 @@
+{
+  	"ELASTICSEARCHTEXT": "http://user:pass@changeme_ip:9200",
+  	"ELASTICSEARCHDOCS": "http://user:pass@changeme_ip:9200",
+	"ENV": "prod",
+	"PATH_BACK": "/cosr/back"
+}

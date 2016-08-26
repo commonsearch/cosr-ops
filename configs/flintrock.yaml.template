@@ -39,8 +39,8 @@ providers:
     #
     instance-type: c4.8xlarge
     region: "us-east-1"
-    availability-zone: "us-east-1a"
-    spot-price: 0.6
+    # availability-zone: "us-east-1a"
+    spot-price: 0.9
 
     #
     # Provisioning options, specific to your AWS account
@@ -48,11 +48,19 @@ providers:
     #
     vpc-id: "vpc-CHANGEME"
     subnet-id: "subnet-CHANGEME"
-    placement-group: "CHANGEME"
+
+    # Name (not ID!) of the security groups you want instances to be part of
     security-groups:
        - "CHANGEME"
+
+    # Name of the Key Pair you created on AWS
     key-name: "CHANGEME"
+
+    # Note: this is the path from inside Docker, not the path on your host filesystem.
     identity-file: "/cosr/ops/configs/CHANGEME.pem"
+
+    # A Placement group is optional but can provide a large performance boost for free!
+    # placement-group: "CHANGEME"
 
     #
     # Standard options
